@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-finish-setup-api"
+description = "Enables the finish_setup_api command without any pre-configured scope."
+commands.allow = ["finish_setup_api"]
+
+[[permission]]
+identifier = "deny-finish-setup-api"
+description = "Denies the finish_setup_api command without any pre-configured scope."
+commands.deny = ["finish_setup_api"]

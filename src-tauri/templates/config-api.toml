@@ -1,0 +1,57 @@
+# Anima — written by the desktop app at first launch ("OpenAI-compatible API" choice).
+# Embeddings, re-ranking and the LLM are called on {{BASE_URL}}: nothing is downloaded.
+# The API key is not stored here: the app passes it to the server from its key file
+# (Settings → Desktop app) as EMBEDDING_API_KEY, RERANKER_API_KEY, PROCESSOR_API_KEY and
+# OPENAI_API_KEY. Every other setting keeps its built-in default: see config.default.toml.
+
+[server]
+host = "127.0.0.1"
+port = 3000
+
+[database]
+path = "./anima.db"
+
+[embedding]
+backend = "openai_compat"
+api_base_url = {{BASE_URL_TOML}}
+api_model = {{EMBEDDING_MODEL}}
+dimension = {{DIMENSION}}
+
+{{RERANKER}}
+
+# Sparse vectors need the local BGE-M3 embedder: off, so nothing is downloaded.
+[sparse]
+enabled = false
+
+# The server requires the whole [search] table: these are its built-in defaults.
+[search]
+rrf_k = 60.0
+weight_vector = 0.6
+weight_keyword = 0.4
+weight_sparse = 0.0
+temporal_weight = 0.2
+temporal_lambda = 0.001
+similarity_threshold = 0.85
+min_vector_similarity = 0.50
+min_score_spread = 0.0
+tier_boost = 0.05
+
+# LLM for chat, ask, consolidation and the background processor.
+[llm]
+base_url = {{BASE_URL_TOML}}
+model = {{CHAT_MODEL}}
+api_key = ""
+
+[processor]
+base_url = {{BASE_URL_TOML}}
+model = {{CHAT_MODEL}}
+api_key = ""
+
+[consolidation]
+enabled = true
+backend = "openai_compat"
+
+[consolidation.openai_compat]
+base_url = {{BASE_URL_TOML}}
+api_key = ""
+model = {{CHAT_MODEL}}

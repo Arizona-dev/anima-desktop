@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "web-ui",
+  "description": "The Anima web UI served by the local server, for the 'Desktop app' section injected into its Settings page: only these settings commands, no plugin access. Paths are picked in native dialogs on the Rust side, never sent by the page.",
+  "windows": ["main"],
+  "local": false,
+  "remote": { "urls": ["http://127.0.0.1:*/*", "http://localhost:*/*"] },
+  "permissions": [
+    "allow-get-settings",
+    "allow-use-external-server",
+    "allow-use-bundled-server",
+    "allow-open-data-dir",
+    "allow-choose-key-file",
+    "allow-clear-key-file",
+    "allow-set-launch-at-login"
+  ]
+}

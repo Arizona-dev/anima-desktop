@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Anima</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <div class="setup">
+    <img class="logo" src="logo.svg" alt="" style="width:48px;height:48px">
+    <div>
+      <h1>Bienvenue dans Anima</h1>
+      <p class="muted">Anima a besoin de modèles pour indexer et retrouver vos mémoires. Où doivent-ils tourner ?</p>
+    </div>
+
+    <label class="choice">
+      <input type="radio" name="mode" value="api" checked>
+      <div style="flex:1">
+        <b>API compatible OpenAI</b>
+        <span class="muted">OpenAI ou tout fournisseur compatible (vLLM, Mistral, Groq, un serveur d'entreprise…). Rien n'est téléchargé sur cet ordinateur.</span>
+        <div class="keybox" id="apibox">
+          <div class="row"><label for="base">URL de l'API</label><input type="text" id="base" value="https://api.openai.com/v1" spellcheck="false"></div>
+          <div class="inline">
+            <div class="row" style="flex:1"><label for="emb">Modèle d'embedding</label><input type="text" id="emb" value="text-embedding-3-small" spellcheck="false"></div>
+            <div class="row"><label for="dim">Dimension</label><input type="number" id="dim" value="1536" min="1"></div>
+          </div>
+          <div class="row"><label for="chat">Modèle de chat</label><input type="text" id="chat" value="gpt-4o-mini" spellcheck="false"></div>
+          <div class="row"><label for="rerank">Modèle de re-ranking <span class="muted">(facultatif, endpoint /rerank)</span></label><input type="text" id="rerank" placeholder="Aucun" spellcheck="false"></div>
+          <div class="row">
+            <label for="key">Clé API</label>
+            <div id="keyState" class="small"></div>
+            <div class="inline">
+              <input type="password" id="key" placeholder="Coller votre clé API" spellcheck="false" autocomplete="off">
+              <button id="saveKey">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </label>
+
+    <label class="choice">
+      <input type="radio" name="mode" value="local">
+      <div>
+        <b>Modèles locaux</b>
+        <span class="muted">Embeddings et re-ranking sur cet ordinateur. Le serveur télécharge environ 571 Mo depuis Hugging Face au premier démarrage. Le chat et le traitement en arrière-plan demandent un LLM (Ollama en local par défaut, voir config.toml).</span>
+      </div>
+    </label>
+
+    <label class="choice">
+      <input type="radio" name="mode" value="import">
+      <div>
+        <b>Importer une installation existante</b>
+        <span class="muted">Un dossier où Anima tournait déjà (avec anima.db) : vos mémoires et sa configuration sont copiées dans l'app. Son serveur est arrêté le temps de la copie ; le dossier n'est pas modifié.</span>
+      </div>
+    </label>
+
+    <div class="actions">
+      <span id="msg" class="msg small"></span>
+      <button id="go" class="primary">Continuer</button>
+    </div>
+  </div>
+  <script>
+    const { invoke } = window.__TAURI__.core;
+    const $ = (id) => document.getElementById(id);
+    let keyFound = false;
+    const err = (text) => { $('msg').textContent = text; $('msg').className = 'msg small error'; };
+    const showKey = (info) => {
+      keyFound = info.keyFound;
+      $('keyState').textContent = info.keyFound ? `Clé enregistrée dans ${info.keyFile}` : 'Aucune clé enregistrée.';
+      $('keyState').className = 'small ' + (info.keyFound ? 'ok' : 'muted');
+    };
+    const mode = () => document.querySelector('input[name=mode]:checked').value;
+    const refresh = () => {
+      $('apibox').style.display = mode() === 'api' ? '' : 'none';
+      $('go').textContent = mode() === 'import' ? 'Choisir le dossier…' : 'Continuer';
+      $('msg').textContent = '';
+    };
+    document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', refresh));
+    invoke('setup_info').then(showKey);
+    refresh();
+
+    $('saveKey').onclick = async (e) => {
+      e.preventDefault();
+      try { showKey(await invoke('save_api_key', { key: $('key').value })); $('key').value = ''; $('msg').textContent = ''; }
+      catch (x) { err(String(x)); }
+    };
+
+    $('go').onclick = async () => {
+      const m = mode();
+      if (m === 'api' && !keyFound && $('key').value.trim()) {
+        try { showKey(await invoke('save_api_key', { key: $('key').value })); $('key').value = ''; }
+        catch (x) { return err(String(x)); }
+      }
+      if (m === 'api' && !keyFound) return err('Enregistrez d\'abord votre clé API.');
+      $('go').disabled = true;
+      try {
+        if (m === 'api') {
+          await invoke('finish_setup_api', { choice: {
+            baseUrl: $('base').value, embeddingModel: $('emb').value, dimension: parseInt($('dim').value, 10) || 0,
+            chatModel: $('chat').value, rerankerModel: $('rerank').value,
+          } });
+        } else if (m === 'local') {
+          await invoke('finish_setup_local');
+        } else {
+          await invoke('import_existing');
+        }
+      } catch (x) { err(String(x)); }
+      $('go').disabled = false;
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Anima</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <div class="center">
+    <img class="logo" src="logo.svg" alt="">
+    <div id="spin" class="spinner" style="margin-top:14px"></div>
+    <p id="msg" class="muted">Démarrage d'Anima…</p>
+  </div>
+  <script>
+    const { invoke } = window.__TAURI__.core;
+    const show = ({ message, error }) => {
+      const m = document.getElementById('msg');
+      m.textContent = message;
+      m.className = error ? 'error' : 'muted';
+      document.getElementById('spin').style.display = error ? 'none' : '';
+    };
+    invoke('last_status').then(show);
+    window.__TAURI__.event.listen('anima://status', (e) => show(e.payload));
+  </script>
+</body>
+</html>

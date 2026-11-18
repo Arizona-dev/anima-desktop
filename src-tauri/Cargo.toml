@@ -1,0 +1,32 @@
+[package]
+name = "anima-desktop"
+version = "0.4.0"
+description = "Anima — desktop app for the Anima memory server"
+authors = ["Farid Naderi"]
+edition = "2021"
+rust-version = "1.77"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Login item: SMAppService on macOS (~/Library/LaunchAgents can be root-owned on managed
+# Macs), the autostart plugin (Run registry key, XDG autostart entry) elsewhere.
+[target.'cfg(target_os = "macos")'.dependencies]
+smappservice-rs = "0.1"
+
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+tauri-plugin-autostart = "2"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true

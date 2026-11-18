@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The app's own local pages (loading, first-launch setup, About, Updates).",
+  "windows": ["main", "about", "updates"],
+  "local": true,
+  "permissions": ["core:default", "core:window:allow-close", "allow-app-info", "allow-last-status", "allow-open-url",
+    "allow-setup-info", "allow-save-api-key", "allow-finish-setup-api", "allow-finish-setup-local", "allow-import-existing",
+    "allow-check-app-update", "allow-install-app-update"]
+}

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Mises à jour d'Anima</title><link rel="stylesheet" href="app.css"></head>
+<body>
+  <div class="center">
+    <div id="spin" class="spinner"></div>
+    <h1 id="title">Recherche des mises à jour…</h1>
+    <div id="detail" class="muted" style="max-width: 360px"></div>
+    <div class="actions" style="margin-top:12px">
+      <button id="later">Fermer</button>
+      <button id="act" class="primary" style="display:none"></button>
+    </div>
+  </div>
+  <script>
+    const { invoke } = window.__TAURI__.core;
+    const $ = (id) => document.getElementById(id);
+    const close = () => window.__TAURI__.window.getCurrentWindow().close();
+    const parts = (v) => v.replace(/^v/i, '').split('.').map((x) => parseInt(x, 10) || 0);
+    const newer = (a, b) => {
+      const x = parts(a), y = parts(b);
+      for (let i = 0; i < Math.max(x.length, y.length); i++) {
+        if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
+      }
+      return false;
+    };
+    const done = (title, detail, error) => {
+      $('spin').style.display = 'none';
+      $('title').textContent = title;
+      $('detail').textContent = detail;
+      $('detail').className = error ? 'error' : 'muted';
+    };
+    const action = (label, fn) => { $('act').textContent = label; $('act').style.display = ''; $('act').onclick = fn; };
+    $('later').onclick = close;
+
+    // External install: its server is updated by hand, from the AnimaLab releases. Asked from
+    // the web view, so the system proxy settings (PAC included) apply on every OS.
+    async function checkExternalServer(info) {
+      const r = await fetch('https://api.github.com/repos/AnimaLab/Anima/releases/latest',
+                            { headers: { Accept: 'application/vnd.github+json' } });
+      if (!r.ok) throw new Error(`GitHub a répondu ${r.status}`);
+      const rel = await r.json();
+      if (!newer(rel.tag_name, info.version ?? '0')) return null;
+      return rel;
+    }
+
+    (async () => {
+      const info = await invoke('app_info');
+      let app;
+      try { app = await invoke('check_app_update'); }
+      catch (e) { return done('Impossible de vérifier les mises à jour', String(e), true); }
+
+      if (app.available) {
+        done(`Anima ${app.version} est disponible`,
+             app.notes?.trim() || `Version installée : ${app.current}. La mise à jour inclut son serveur Anima.`);
+        $('later').textContent = 'Plus tard';
+        action('Installer et redémarrer', async () => {
+          $('act').disabled = true; $('later').disabled = true;
+          $('spin').style.display = '';
+          $('title').textContent = 'Installation…';
+          $('detail').textContent = 'Anima redémarre tout seul à la fin.';
+          try { await invoke('install_app_update'); }
+          catch (e) { $('later').disabled = false; done('L\'installation a échoué', String(e), true); }
+        });
+        return;
+      }
+
+      if (!info.bundled) {
+        try {
+          const rel = await checkExternalServer(info);
+          if (rel) {
+            done(`Serveur Anima ${rel.tag_name} disponible`,
+                 `Votre installation externe est en version ${info.version}. Téléchargez la nouvelle version et remplacez anima-server dans ${info.serverDir}.`);
+            $('later').textContent = 'Plus tard';
+            action('Télécharger', () => invoke('open_url', { url: rel.html_url }));
+            return;
+          }
+        } catch (e) { return done('Impossible de vérifier le serveur', e.message, true); }
+      }
+      done('Anima est à jour', `App ${app.current}, serveur Anima ${app.server ?? '?'}${info.bundled ? '' : ' (installation externe)'}.`);
+    })();
+  </script>
+</body>
+</html>

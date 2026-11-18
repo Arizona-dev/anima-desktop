@@ -1,0 +1,8 @@
+src-tauri/target/
+src-tauri/gen/
+.DS_Store
+# Fetched by tools/fetch-server.sh
+src-tauri/binaries/
+src-tauri/resources/server/
+# Local cargo settings (e.g. a corporate crates mirror): not part of the project.
+.cargo/
