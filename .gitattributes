@@ -1,0 +1,5 @@
+# LF everywhere, so scripts and version files read the same on Windows runners.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary

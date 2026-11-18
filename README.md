@@ -67,7 +67,9 @@ cargo tauri build --bundles app      # macOS: target/release/bundle/macos/Anima.
 ```
 
 - `src-tauri/server-version` is the Anima server release the app ships; `tools/fetch-server.sh`
-  downloads it (or takes `--from <extracted release folder>`).
+  downloads it (or takes `--from <extracted release folder>`). On Windows the server's DLLs
+  (DirectML) are installed next to the app executable, where the server runs
+  (`tauri.windows.conf.json`).
 - The app version (`src-tauri/tauri.conf.json` and `Cargo.toml`) is the app's own: it can move
   for an app-only fix without a new server.
 - With `createUpdaterArtifacts` on, a build signs its update archive: set

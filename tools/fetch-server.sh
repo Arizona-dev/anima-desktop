@@ -2,6 +2,7 @@
 # Puts the Anima server into the app sources, for the version in src-tauri/server-version:
 #   src-tauri/binaries/anima-server-<target-triple>[.exe]   (Tauri sidecar)
 #   src-tauri/resources/server/{web/dist, models, config.default.toml}
+#   src-tauri/resources/windows/*.dll                       (Windows only)
 #
 # Usage: tools/fetch-server.sh [--target <triple>] [--from <extracted release folder>]
 # Without --from, downloads the release asset from github.com/AnimaLab/Anima.
@@ -17,8 +18,8 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-[ -n "$target" ] || target="$(rustc -vV | sed -n 's/^host: //p')"
-version="$(tr -d " \n" < src-tauri/server-version)"
+[ -n "$target" ] || target="$(rustc -vV | tr -d "\r" | sed -n "s/^host: //p")"
+version="$(tr -d " \r\n" < src-tauri/server-version)"
 ext=""; [[ "$target" == *windows* ]] && ext=".exe"
 
 if [ -z "$from" ]; then
@@ -42,6 +43,13 @@ fi
 mkdir -p src-tauri/binaries
 cp "$from/anima-server$ext" "src-tauri/binaries/anima-server-${target}${ext}"
 chmod +x "src-tauri/binaries/anima-server-${target}${ext}"
+
+# Windows: DLLs the server loads from its own folder (DirectML for ONNX Runtime). Tauri installs
+# them next to the app executable, where the sidecar runs (src-tauri/tauri.windows.conf.json).
+rm -rf src-tauri/resources/windows; mkdir -p src-tauri/resources/windows
+if [ -n "$ext" ]; then
+  for dll in "$from"/*.dll; do [ -e "$dll" ] && cp "$dll" src-tauri/resources/windows/; done
+fi
 
 res=src-tauri/resources/server
 rm -rf "$res"; mkdir -p "$res/web"

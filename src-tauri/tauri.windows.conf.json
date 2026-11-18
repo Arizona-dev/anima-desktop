@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "resources": {
+      "resources/server/": "server/",
+      "resources/windows/DirectML.dll": "DirectML.dll"
+    }
+  }
+}
