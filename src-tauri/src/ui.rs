@@ -14,7 +14,8 @@ use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent}
 use tauri::{AppHandle, Emitter, Manager, Runtime, State, Url, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::DialogExt;
 
-pub const REPO_URL: &str = "https://github.com/AnimaLab/Anima";
+/// This app's repository (About window).
+pub const REPO_URL: &str = "https://github.com/Arizona-dev/anima-desktop";
 const TRAY_ID: &str = "anima";
 
 // Injected into the Anima web UI: style fixes and the "Desktop app" section of its Settings page.
