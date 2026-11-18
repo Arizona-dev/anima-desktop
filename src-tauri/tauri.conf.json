@@ -25,7 +25,6 @@
     ],
     "category": "Productivity",
     "shortDescription": "Anima memory server, in a desktop app",
-    "copyright": "© 2026 Farid Naderi",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -51,7 +50,9 @@
     "resources": {
       "resources/server/": "server/"
     },
-    "createUpdaterArtifacts": true
+    "createUpdaterArtifacts": true,
+    "license": "MIT",
+    "licenseFile": "../LICENSE"
   },
   "plugins": {
     "updater": {

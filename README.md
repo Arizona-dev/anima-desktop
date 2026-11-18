@@ -98,4 +98,7 @@ A second launch shows the running window; `--open <about|updates|settings|logs|f
 runs that menu action in the running instance instead. On macOS, `--login-item on|off|status`
 manages the login item and exits.
 
-© 2026 Farid Naderi
+## License
+
+MIT, see [LICENSE](LICENSE). The bundled Anima server has its own license, shipped with
+it (see the [Anima repository](https://github.com/AnimaLab/Anima)).

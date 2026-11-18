@@ -15,7 +15,6 @@ use tauri::{AppHandle, Emitter, Manager, Runtime, State, Url, WebviewUrl, Webvie
 use tauri_plugin_dialog::DialogExt;
 
 pub const REPO_URL: &str = "https://github.com/AnimaLab/Anima";
-pub const AUTHOR: &str = "Farid Naderi";
 const TRAY_ID: &str = "anima";
 
 // Injected into the Anima web UI: style fixes and the "Desktop app" section of its Settings page.
@@ -321,7 +320,6 @@ pub fn app_info(state: State<AppState>) -> serde_json::Value {
         "serverDir": paths.data.display().to_string(),
         "appVersion": env!("CARGO_PKG_VERSION"),
         "repo": REPO_URL,
-        "author": AUTHOR,
     })
 }
 
